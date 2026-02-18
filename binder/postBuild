@@ -1,0 +1,18 @@
+#!/bin/bash
+# Enable ipywidgets for the notebook server
+set -e
+echo "Enabling ipywidgets nbextension..."
+jupyter nbextension enable --py widgetsnbextension --sys-prefix || true
+# For JupyterLab (v3+) the jupyterlab manager should be available via the
+# installed packages; for older versions try to install the labextension.
+set +e
+if jupyter lab --version >/dev/null 2>&1; then
+	echo "JupyterLab detected; ensuring jupyter-widgets manager is available..."
+	# try to install the classic manager extension if needed
+	jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build || true
+	jupyter lab build || true
+fi
+set -e
+echo "Installing/refreshing ipywidgets via pip (no-deps)..."
+python -m pip install --no-deps --upgrade ipywidgets || true
+echo "Binder postBuild finished."
